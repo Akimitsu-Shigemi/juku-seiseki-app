@@ -58,6 +58,54 @@ flowchart TB
 
 > 色は「どのサーバー（層）か」を見分けるためだけに付けています（外部／Cloudflare／アプリ／データ）。意味づけはしていません。
 
+## 2-2. デプロイ構成図（講座の実スタック・Day14/16）
+
+いぐおさんのDay16テンプレを、このアプリ用に発展させたもの（実際にどの技術をどう繋ぐか）。点線のまたぎが**信頼境界**。
+
+```mermaid
+flowchart LR
+    User["利用者<br/>生徒/保護者/先生/運営"] --> Browser["ブラウザ"]
+
+    subgraph Local["ローカル開発（信頼する）"]
+        VSCode["VS Code"]
+        Branches["feature/* → develop → main"]
+        VSCode --> Branches
+    end
+
+    subgraph GitHubBox["GitHub（信頼する）"]
+        GitHubMain["main"]
+        Guards["GitHub Actions / Hook / Dependabot"]
+    end
+
+    subgraph Edge["Cloudflare（境界の門番）"]
+        CF["TLS終端・WAF・レート制限・DDoS防御"]
+    end
+
+    subgraph RenderService["Render（信頼する）"]
+        HTTPS["HTTPS"]
+        Flask["Flaskアプリ<br/>認証・認可・合格確率"]
+        HTTPS --> Flask
+    end
+
+    subgraph NeonDB["Neon（最重要データ）"]
+        Neon[("PostgreSQL<br/>成績・個人情報")]
+    end
+
+    Branches -->|push| GitHubMain
+    GitHubMain -->|mainへのpushで自動デプロイ| HTTPS
+    Browser --> CF
+    CF --> HTTPS
+    Flask --> Neon
+
+    style Local        fill:#eaf2ff,stroke:#4a74a5,stroke-width:2px,color:#1f2937
+    style GitHubBox    fill:#edf7ed,stroke:#54804d,stroke-width:2px,color:#1f2937
+    style Edge         fill:#fff3e5,stroke:#b36b24,stroke-width:2px,color:#1f2937
+    style RenderService fill:#fdeeee,stroke:#b03a3a,stroke-width:2px,color:#1f2937
+    style NeonDB       fill:#f3ecfa,stroke:#7351a1,stroke-width:2px,color:#1f2937
+```
+
+> 信頼境界（線をまたぐ所）：①ブラウザ↔Cloudflare ②Cloudflare↔Render ③Render↔Neon ④ローカル↔GitHub。`.env`（秘密情報）はGit管理外、使用ツールはバージョン明記（Day9・10）。
+
 ## 3. 信頼境界（Trust Boundary）
 
 | # | 境界 | 「信頼できない側」→「信頼できる側」 |
