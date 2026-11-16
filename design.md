@@ -15,27 +15,27 @@
 
 ```mermaid
 flowchart TB
-    subgraph internet["インターネット（信頼できない領域）"]
-        seito["生徒のブラウザ"]
-        oya["保護者のブラウザ"]
-        sensei["先生のブラウザ"]
-        unei["運営のブラウザ"]
-        attacker["攻撃者"]
+    subgraph internet["🌐 インターネット（信頼できない領域）"]
+        seito["👦 生徒のブラウザ"]
+        oya["👪 保護者のブラウザ"]
+        sensei["🧑‍🏫 先生のブラウザ"]
+        unei["🏢 運営のブラウザ"]
+        attacker["😈 攻撃者"]
     end
 
-    subgraph edge["Cloudflare（WAF / CDN / DDoS防御）"]
+    subgraph edge["☁️ Cloudflare（WAF / CDN / DDoS防御）"]
         waf["TLS終端・WAF・レート制限"]
     end
 
-    subgraph app["アプリサーバ（Flask など）"]
-        authn["認証：本人確認（ログイン）"]
-        authz["認可：役割ごとの閲覧制御"]
-        logic["成績表示・推移グラフ・合格確率"]
+    subgraph app["🖥️ アプリサーバ（Flask など）"]
+        authn["🔑 認証：本人確認（ログイン）"]
+        authz["🚦 認可：役割ごとの閲覧制御"]
+        logic["📊 成績表示・推移グラフ・合格確率"]
     end
 
-    subgraph data["データ層（最重要・機密）"]
+    subgraph data["🗄️ データ層（最重要・機密）"]
         db[("成績DB・個人情報")]
-        secret["パスワード（ハッシュ化）"]
+        secret["🔒 パスワード（ハッシュ化）"]
     end
 
     seito --> waf
@@ -48,7 +48,17 @@ flowchart TB
     authz --> logic
     logic --> db
     authn --> secret
+
+    %% ===== 背景色（信頼境界ごとに色分け）=====
+    style internet fill:#ffecec,stroke:#c0392b,stroke-width:2px
+    style edge     fill:#fff3e5,stroke:#b36b24,stroke-width:2px
+    style app      fill:#edf7ed,stroke:#54804d,stroke-width:2px
+    style data     fill:#f3ecfa,stroke:#7351a1,stroke-width:3px
+    style attacker fill:#c0392b,stroke:#7b241c,color:#ffffff
+    style authz    fill:#fff8c5,stroke:#9a7d0a,stroke-width:2px
 ```
+
+> 色の意味：🔴赤＝外部（信頼しない）／🟠橙＝門番(Cloudflare)／🟢緑＝アプリ内部／🟣紫＝最重要データ。黄色の「認可」が**今回の一番の勘所**。
 
 ## 3. 信頼境界（Trust Boundary）
 
