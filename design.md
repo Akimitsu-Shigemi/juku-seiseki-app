@@ -50,10 +50,10 @@ flowchart TB
     authn --> secret
 
     %% ===== 背景色（サーバー／層ごとの区別用）=====
-    style internet fill:#eef2ff,stroke:#4a74a5,stroke-width:2px
-    style edge     fill:#fff3e5,stroke:#b36b24,stroke-width:2px
-    style app      fill:#edf7ed,stroke:#54804d,stroke-width:2px
-    style data     fill:#f3ecfa,stroke:#7351a1,stroke-width:2px
+    style internet fill:#eef2ff,stroke:#4a74a5,stroke-width:2px,color:#1f2937
+    style edge     fill:#fff3e5,stroke:#b36b24,stroke-width:2px,color:#1f2937
+    style app      fill:#edf7ed,stroke:#54804d,stroke-width:2px,color:#1f2937
+    style data     fill:#f3ecfa,stroke:#7351a1,stroke-width:2px,color:#1f2937
 ```
 
 > 色は「どのサーバー（層）か」を見分けるためだけに付けています（外部／Cloudflare／アプリ／データ）。意味づけはしていません。
