@@ -49,16 +49,14 @@ flowchart TB
     logic --> db
     authn --> secret
 
-    %% ===== 背景色（信頼境界ごとに色分け）=====
-    style internet fill:#ffecec,stroke:#c0392b,stroke-width:2px
+    %% ===== 背景色（サーバー／層ごとの区別用）=====
+    style internet fill:#eef2ff,stroke:#4a74a5,stroke-width:2px
     style edge     fill:#fff3e5,stroke:#b36b24,stroke-width:2px
     style app      fill:#edf7ed,stroke:#54804d,stroke-width:2px
-    style data     fill:#f3ecfa,stroke:#7351a1,stroke-width:3px
-    style attacker fill:#c0392b,stroke:#7b241c,color:#ffffff
-    style authz    fill:#fff8c5,stroke:#9a7d0a,stroke-width:2px
+    style data     fill:#f3ecfa,stroke:#7351a1,stroke-width:2px
 ```
 
-> 色の意味：🔴赤＝外部（信頼しない）／🟠橙＝門番(Cloudflare)／🟢緑＝アプリ内部／🟣紫＝最重要データ。黄色の「認可」が**今回の一番の勘所**。
+> 色は「どのサーバー（層）か」を見分けるためだけに付けています（外部／Cloudflare／アプリ／データ）。意味づけはしていません。
 
 ## 3. 信頼境界（Trust Boundary）
 
