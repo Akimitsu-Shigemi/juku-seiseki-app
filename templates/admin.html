@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>全生徒の成績＋合格確率（運営）</h1>
+<p class="muted">合格確率は運営のみが閲覧できます。</p>
+<table>
+  <tr><th>氏名</th><th>志望校</th>{% for ex in exams %}<th>{{ ex }}<br>平均</th>{% endfor %}<th>偏差値</th><th>合格確率</th></tr>
+  {% for r in rows %}
+  <tr>
+    <td><a href="{{ url_for('student_page', student_id=r.id) }}">{{ r.name }}</a></td>
+    <td>{{ r.school }}</td>
+    {% for ex in exams %}<td>{{ r.averages[ex] if r.averages[ex] is not none else '—' }}</td>{% endfor %}
+    <td>{{ r.hensachi if r.hensachi is not none else '—' }}</td>
+    <td><strong>{{ r.prob ~ '%' if r.prob is not none else '—' }}</strong></td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

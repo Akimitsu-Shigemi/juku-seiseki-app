@@ -1,0 +1,7 @@
+services:
+  web:
+    build: .
+    env_file: .env          # SECRET_KEY をここから読む（.env はGit管理外）
+    ports:
+      - "127.0.0.1:8080:5000"   # ローカルのみ公開
+    restart: unless-stopped

@@ -110,9 +110,9 @@ flowchart LR
     User["利用者<br/>生徒/保護者/先生/運営"] --> Browser["ブラウザ"]
 
     subgraph Local["ローカル開発（信頼する）"]
-        VSCode["VS Code"]
+        ClaudeCode["Claude Code"]
         Branches["feature/* → develop → main"]
-        VSCode --> Branches
+        ClaudeCode --> Branches
     end
 
     subgraph GitHubBox["GitHub（信頼する）"]
@@ -207,12 +207,12 @@ STRIDE = なりすまし / 改ざん / 否認 / 情報漏洩 / サービス妨�
 | 層 | 採用 |
 |---|---|
 | フロント | ブラウザ（HTML/CSS/JS） |
-| ローカル開発 | VS Code ＋ Gitブランチ（feature/* → develop → main） |
+| ローカル開発 | Claude Code（AIコーディング）＋ Gitブランチ（feature/* → develop → main） |
 | バージョン管理 | GitHub（mainへpushで自動デプロイ）／GitHub Actions・Dependabot |
 | サーバー | Render（PaaS）＋ Flask（Python） |
 | DB | Neon（PostgreSQL） |
 | 門番 | Cloudflare（TLS・WAF・レート制限・DDoS防御） |
-| コンテナ | Docker（隔離・配布・スキャン） |
+| コンテナ | Docker（アプリを隔離コンテナで非rootで動かす／同じ環境を再現／OWASP ZAPで巡回。※ローカルで動かすだけなら必須ではない） |
 
 信頼できる既存のフレームワーク・ライブラリを使い、独自実装を避ける。使用ツールはバージョンまで記載する。
 
@@ -247,6 +247,32 @@ STRIDE = なりすまし / 改ざん / 否認 / 情報漏洩 / サービス妨�
 - 本番運用（実在の生徒データの取り扱い）。学習用・ダミーデータのみ。
 - 決済・課金。
 - 入力/編集UIを足す場合は、書き込み認可（先生のみ等）を別途要件化する。
+
+---
+
+---
+
+## 14. 動かし方
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+cp .env.example .env          # SECRET_KEY を設定（python -c "import secrets;print(secrets.token_hex(32))"）
+.venv/bin/python seed.py      # ダミーデータ投入
+.venv/bin/python app.py       # http://127.0.0.1:5000
+.venv/bin/python -m pytest    # テスト
+```
+
+Dockerで隔離して動かす場合：`docker compose up --build`（http://127.0.0.1:8080 ）。
+
+### テスト用アカウント（ダミー）
+
+| 役割 | ID | パスワード |
+|---|---|---|
+| 生徒 | tanaka | sakura123 |
+| 保護者 | oya_tanaka | chichi100 |
+| 先生 | sensei | teacher2026 |
+| 運営 | unei | admin0000 |
 
 ---
 

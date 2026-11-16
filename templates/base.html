@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>成績管理アプリ{% block title %}{% endblock %}</title>
+<style>
+  :root { --line:#e2e8f0; --ink:#1f2937; --accent:#4a74a5; }
+  * { box-sizing: border-box; }
+  body { font-family: system-ui,-apple-system,"Hiragino Sans",sans-serif;
+         margin:0; background:#f7fafc; color:var(--ink); }
+  header { background:#fff; border-bottom:1px solid var(--line);
+           padding:12px 20px; display:flex; justify-content:space-between; align-items:center; }
+  header .who { font-size:14px; color:#475569; }
+  main { max-width:860px; margin:0 auto; padding:20px 16px; }
+  h1 { font-size:20px; } h2 { font-size:16px; margin-top:24px; }
+  table { border-collapse:collapse; width:100%; background:#fff; margin:12px 0; }
+  th,td { border:1px solid var(--line); padding:8px 10px; text-align:center; font-size:14px; }
+  th { background:#f1f5f9; }
+  a { color:var(--accent); }
+  .btn { display:inline-block; padding:8px 14px; background:var(--accent); color:#fff;
+         border:0; border-radius:6px; text-decoration:none; cursor:pointer; font-size:14px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:8px; padding:16px; margin:12px 0; }
+  .muted { color:#64748b; font-size:13px; }
+  .err { background:#fdeeee; border:1px solid #e3b4b4; color:#9b2c2c; padding:10px; border-radius:6px; }
+</style>
+</head>
+<body>
+<header>
+  <strong>学習塾 成績管理</strong>
+  {% if user %}<span class="who">{{ user.name }}（{{ user.role }}）｜<a href="{{ url_for('logout') }}">ログアウト</a></span>{% endif %}
+</header>
+<main>
+{% block content %}{% endblock %}
+</main>
+</body>
+</html>

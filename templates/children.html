@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>お子さまの成績</h1>
+<p class="muted">閲覧できるのは、ご自身のお子さまのみです。</p>
+{% for kid in kids %}
+  <div class="card">
+    <strong>{{ kid.name }}</strong>（志望校：{{ kid.school }}）
+    <a class="btn" style="float:right" href="{{ url_for('student_page', student_id=kid.id) }}">成績を見る</a>
+  </div>
+{% endfor %}
+{% endblock %}
