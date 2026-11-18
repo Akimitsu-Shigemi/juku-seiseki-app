@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}｜合否判定{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('teacher_page') }}">← 全生徒一覧へ戻る</a></p>
+<h1>合否判定：{{ student.name }}</h1>
+<p class="muted">
+  出身高校：{{ student.highschool }}｜第一志望：{{ student.school }}
+  {% if hensachi is not none %}｜模試偏差値（目安）：<strong>{{ hensachi }}</strong>{% endif %}
+</p>
+<p class="muted">
+  ※偏差値は塾内の相対値（デモ）、合格確率は河合塾ボーダー偏差値の<strong>目安</strong>に基づく参考値です。
+  必要科目・偏差値は入試方式・年度で変わるため、出願前に河合塾Kei-Net等の公式で確認してください。
+  この画面は先生・運営のみが閲覧できます。
+</p>
+
+{% for group, items in grouped %}
+<h2>{{ group }}</h2>
+<table>
+  <tr><th>大学・学部</th><th>ボーダー偏差値<br>(目安)</th><th>合格確率<br>(目安)</th><th>必要科目（目安）</th></tr>
+  {% for it in items %}
+  <tr>
+    <td style="text-align:left">{{ it.name }}{% if it.name == student.school %} <span class="muted">（第一志望）</span>{% endif %}</td>
+    <td>{{ it.hensachi }}</td>
+    <td>
+      {% if it.prob is none %}—
+      {% elif it.prob >= 60 %}<strong style="color:#276749">{{ it.prob }}%</strong>
+      {% elif it.prob >= 30 %}<strong style="color:#92610a">{{ it.prob }}%</strong>
+      {% else %}<strong style="color:#9b2c2c">{{ it.prob }}%</strong>{% endif %}
+    </td>
+    <td style="text-align:left">{{ it.subjects }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endfor %}
+{% endblock %}

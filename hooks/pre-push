@@ -1,0 +1,17 @@
+#!/bin/bash
+# 1) main への直接push を禁止
+# 2) push の前に pytest を実行し、赤なら中止する
+root=$(git rev-parse --show-toplevel) || exit 1
+cd "$root" || exit 1
+branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+if [ "$branch" = "main" ]; then
+  echo "⛔ main への直接push は禁止です。プルリクエスト経由にしてください。" >&2
+  exit 1
+fi
+if [ -x .venv/bin/python ]; then PY=.venv/bin/python; else PY=python3; fi
+echo "pre-push: pytest を実行中..."
+if ! "$PY" -m pytest -q; then
+  echo "⛔ テストが失敗（赤）しました。push を中止します。" >&2
+  exit 1
+fi
+exit 0

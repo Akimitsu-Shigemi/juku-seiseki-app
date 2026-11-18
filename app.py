@@ -9,6 +9,7 @@
 - ログイン・閲覧を監査ログに記録
 """
 import os
+import secrets
 import sqlite3
 import statistics
 import time
@@ -24,15 +25,57 @@ load_dotenv()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.environ.get("DB_PATH", os.path.join(BASE_DIR, "seiseki.db"))
 
-SUBJECTS = [("kokugo", "国語"), ("sugaku", "数学"), ("eigo", "英語"),
-            ("rika", "理科"), ("shakai", "社会")]
-EXAMS = ["2026-04", "2026-07", "2026-10"]
+# 文系3科目（少科目特化）
+SUBJECTS = [("eigo", "英語"), ("kokugo", "国語"), ("sentaku", "選択(地歴公民)")]
+SUBJECT_KEYS = {key for key, _ in SUBJECTS}   # 入力検証用のホワイトリスト
+# 河合塾 全統模試を想定した回
+EXAMS = ["2026-05", "2026-08", "2026-11"]
 
-# 志望校の基準偏差値（運営のみが合格確率計算に使う。生徒には見せない）
-SCHOOL_HENSACHI = {
-    "今治西高校": 65, "今治北高校": 54, "今治南高校": 43,
-    "今治工業高校": 39, "今治精華高校": 42, "今治明徳高校": 38,
-}
+# 志望校（私立大学・学部）の目安データ。
+#   hensachi : 河合塾のボーダー偏差値を参考にした「目安」。年度・方式で変わるため要更新。
+#   subjects : その学部の必要科目の「目安」。実際は募集要項で要確認。
+# 合格確率・合否判定は先生・運営のみが使う（生徒には合格確率を見せない）。
+TARGETS = [
+    {"name": "早稲田大学 政治経済学部", "group": "早慶上智ICU", "hensachi": 70.0,
+     "subjects": "共通テスト＋学部独自(総合問題)。数学が必須"},
+    {"name": "早稲田大学 商学部", "group": "早慶上智ICU", "hensachi": 70.0,
+     "subjects": "英語・国語・選択(地歴/数学)"},
+    {"name": "慶應義塾大学 経済学部", "group": "早慶上智ICU", "hensachi": 67.5,
+     "subjects": "英語・数学or地歴＋小論文（国語なし）"},
+    {"name": "慶應義塾大学 商学部", "group": "早慶上智ICU", "hensachi": 67.5,
+     "subjects": "英語・地歴＋数学or小論文（国語なし）"},
+    {"name": "上智大学 経済学部", "group": "早慶上智ICU", "hensachi": 65.0,
+     "subjects": "英語外部試験(TEAP)・共通テスト併用など"},
+    {"name": "国際基督教大学(ICU) 教養学部", "group": "早慶上智ICU", "hensachi": 67.5,
+     "subjects": "独自試験(総合教養＋人文/社会科学)"},
+    {"name": "明治大学 商学部", "group": "MARCH", "hensachi": 62.5,
+     "subjects": "英語・国語・選択(地歴公民)"},
+    {"name": "明治大学 政治経済学部", "group": "MARCH", "hensachi": 62.5,
+     "subjects": "英語・国語・選択(地歴公民/数学)"},
+    {"name": "青山学院大学 経営学部", "group": "MARCH", "hensachi": 62.5,
+     "subjects": "英語・国語・選択(共通テスト併用の方式あり)"},
+    {"name": "立教大学 経営学部", "group": "MARCH", "hensachi": 65.0,
+     "subjects": "英語外部試験＋共通テスト＋独自"},
+    {"name": "中央大学 商学部", "group": "MARCH", "hensachi": 60.0,
+     "subjects": "英語・国語・選択(地歴公民)"},
+    {"name": "法政大学 経営学部", "group": "MARCH", "hensachi": 60.0,
+     "subjects": "英語・国語・選択(地歴公民)"},
+    {"name": "関西大学 経済学部", "group": "関関同立", "hensachi": 57.5,
+     "subjects": "英語・国語・選択(地歴公民)"},
+    {"name": "関西学院大学 商学部", "group": "関関同立", "hensachi": 57.5,
+     "subjects": "英語・国語・選択(地歴公民)"},
+    {"name": "同志社大学 商学部", "group": "関関同立", "hensachi": 62.5,
+     "subjects": "英語・国語・選択(地歴公民)"},
+    {"name": "立命館大学 経営学部", "group": "関関同立", "hensachi": 57.5,
+     "subjects": "英語・国語・選択(全学統一方式など)"},
+    {"name": "学習院大学 経済学部", "group": "その他", "hensachi": 60.0,
+     "subjects": "英語・国語・選択(地歴公民)"},
+    {"name": "日本大学 経済学部", "group": "その他", "hensachi": 55.0,
+     "subjects": "英語・国語・選択(N方式など)"},
+    {"name": "松山大学 経済学部", "group": "その他", "hensachi": 50.0,
+     "subjects": "英語・国語・選択(地歴公民)"},
+]
+TARGET_BY_NAME = {t["name"]: t for t in TARGETS}
 
 # ログイン試行の回数制限（メモリ内。本番はRedis等）
 _LOGIN_FAILS = {}          # username -> [失敗時刻,...]
@@ -77,6 +120,23 @@ def audit(action, detail=""):
         (datetime.now(timezone.utc).isoformat(), actor, action, detail),
     )
     get_db().commit()
+
+
+# ---------- CSRF対策（更新系POST用） ----------
+def get_csrf_token():
+    """セッションごとのCSRFトークン。無ければ発行する。"""
+    token = session.get("csrf_token")
+    if not token:
+        token = secrets.token_urlsafe(32)
+        session["csrf_token"] = token
+    return token
+
+
+def csrf_ok():
+    """POSTのトークンがセッションのトークンと一致するか（タイミング安全に比較）。"""
+    sent = request.form.get("csrf_token", "")
+    real = session.get("csrf_token", "")
+    return bool(real) and secrets.compare_digest(sent, real)
 
 
 # ---------- 認証・認可 ----------
@@ -134,11 +194,17 @@ def can_view_student(user, student_id):
 # ---------- データ取得 ----------
 def get_student(student_id):
     return get_db().execute(
-        """SELECT u.id, u.name, s.school
+        """SELECT u.id, u.name, s.highschool, s.school
            FROM users u JOIN students s ON s.user_id = u.id
            WHERE u.id = ? AND u.role = 'student'""",
         (student_id,),
     ).fetchone()
+
+
+def target_subjects(school):
+    """志望校（大学・学部）の必要科目（目安）。未登録ならNone。"""
+    t = TARGET_BY_NAME.get(school)
+    return t["subjects"] if t else None
 
 
 def get_scores(student_id):
@@ -150,6 +216,20 @@ def get_scores(student_id):
     for r in rows:
         table.setdefault(r["exam"], {})[r["subject"]] = r["score"]
     return table
+
+
+def save_score(student_id, exam, subject, score):
+    """点数を1件、上書き保存する（同じ生徒・回・教科は更新）。
+    呼ぶ前に exam/subject/score を検証済みであること。SQLはプレースホルダのみ。"""
+    db = get_db()
+    db.execute(
+        """INSERT INTO scores (student_id, exam, subject, score)
+           VALUES (?,?,?,?)
+           ON CONFLICT (student_id, exam, subject)
+           DO UPDATE SET score = excluded.score""",
+        (student_id, exam, subject, score),
+    )
+    db.commit()
 
 
 def exam_average(score_table, exam):
@@ -200,17 +280,22 @@ def build_chart(averages):
 
 
 def pass_probability(student_hensachi, school):
-    """運営のみ。生徒偏差値と志望校基準から合格確率(%)。"""
-    base = SCHOOL_HENSACHI.get(school)
-    if student_hensachi is None or base is None:
+    """先生・運営のみ。生徒の偏差値と志望校（大学・学部）の基準偏差値から合格確率(%)。"""
+    target = TARGET_BY_NAME.get(school)
+    if student_hensachi is None or target is None:
         return None
-    p = 50 + (student_hensachi - base) * 5
+    p = 50 + (student_hensachi - target["hensachi"]) * 5
     return max(1, min(99, round(p)))
 
 
 # ---------- ルート ----------
 def register_routes(app):
     app.teardown_appcontext(close_db)
+
+    @app.context_processor
+    def inject_csrf():
+        # テンプレートから {{ csrf_token() }} で使えるようにする
+        return {"csrf_token": get_csrf_token}
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
@@ -285,6 +370,8 @@ def register_routes(app):
         return render_template(
             "student.html", user=user, student=student, subjects=SUBJECTS,
             exams=EXAMS, table=table, averages=averages, hensachi=hensachi,
+            req_subjects=target_subjects(student["school"]),
+            can_judge=user["role"] in ("teacher", "admin"),
             chart=build_chart(averages))
 
     @app.route("/teacher")
@@ -299,6 +386,81 @@ def register_routes(app):
                 "averages": {ex: exam_average(table, ex) for ex in EXAMS},
             })
         return render_template("teacher.html", user=user, exams=EXAMS, rows=rows)
+
+    @app.route("/teacher/input/<int:student_id>", methods=["GET", "POST"])
+    @role_required("teacher", "admin")
+    def score_input(student_id):
+        # 認可: 入力できるのは先生・運営のみ（デコレータで担保）
+        student = get_student(student_id)
+        if student is None:
+            abort(404)
+
+        error = None
+        saved_exam = None
+        if request.method == "POST":
+            # 1) CSRFトークンの照合（更新系の必須チェック）
+            if not csrf_ok():
+                audit("score_input_csrf_ng", str(student_id))
+                abort(400)
+
+            # 2) 回（exam）はホワイトリストのみ
+            exam = request.form.get("exam", "")
+            if exam not in EXAMS:
+                error = "不正な回が指定されました。"
+            else:
+                # 3) 各教科の点数を検証（空欄は変更しない）
+                to_save = []
+                for key in SUBJECT_KEYS:
+                    raw = request.form.get("score_" + key, "").strip()
+                    if raw == "":
+                        continue
+                    if not raw.isdigit():        # マイナス・小数・文字を弾く
+                        error = "点数は0〜100の整数で入力してください。"
+                        break
+                    val = int(raw)
+                    if not (0 <= val <= 100):
+                        error = "点数は0〜100の範囲で入力してください。"
+                        break
+                    to_save.append((key, val))
+                else:
+                    # 検証を全部通ったときだけ保存する
+                    for key, val in to_save:
+                        save_score(student_id, exam, key, val)
+                    audit("score_update",
+                          f"student={student_id} exam={exam} "
+                          f"subjects={','.join(k for k, _ in to_save)}")
+                    saved_exam = exam
+
+        table = get_scores(student_id)
+        return render_template(
+            "score_input.html", user=current_user(), student=student,
+            subjects=SUBJECTS, exams=EXAMS, table=table,
+            error=error, saved_exam=saved_exam,
+        ), (400 if error else 200)
+
+    @app.route("/hantei/<int:student_id>")
+    @role_required("teacher", "admin")
+    def hantei(student_id):
+        # 合否判定: 生徒1人について、各大学・学部の合格確率と必要科目を一覧（先生・運営のみ）
+        student = get_student(student_id)
+        if student is None:
+            abort(404)
+        audit("view_hantei", str(student_id))
+        hensachi = deviation_values().get(student_id)
+
+        # グループ順にまとめる
+        order = ["早慶上智ICU", "MARCH", "関関同立", "その他"]
+        groups = {g: [] for g in order}
+        for t in TARGETS:
+            groups[t["group"]].append({
+                "name": t["name"], "hensachi": t["hensachi"],
+                "subjects": t["subjects"],
+                "prob": pass_probability(hensachi, t["name"]),
+            })
+        grouped = [(g, groups[g]) for g in order if groups[g]]
+        return render_template(
+            "hantei.html", user=current_user(), student=student,
+            hensachi=hensachi, grouped=grouped)
 
     @app.route("/admin")
     @role_required("admin")

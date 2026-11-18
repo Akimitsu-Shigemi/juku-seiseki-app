@@ -1,0 +1,13 @@
+# 監視対象（ガードレール／フック／ルールのファイル一覧）
+# 1行1パス。このファイル自体も監視対象に含める。
+AGENTS.md
+SECURITY.md
+SPEC.md
+.github/workflows/guardrail-watch.yml
+.github/CODEOWNERS
+.claude/settings.json
+hooks/pre-commit
+hooks/pre-push
+tools/guardrail-files.txt
+tools/guardrail-check.sh
+tools/guardrail-approve.sh

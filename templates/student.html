@@ -1,12 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>{{ student.name }} さんの成績</h1>
-<p class="muted">志望校：{{ student.school }}
-  {% if hensachi is not none %}｜現在の偏差値：<strong>{{ hensachi }}</strong>{% endif %}</p>
+<p class="muted">
+  出身高校：{{ student.highschool }}｜第一志望：<strong>{{ student.school }}</strong>
+  {% if hensachi is not none %}｜模試偏差値（目安）：<strong>{{ hensachi }}</strong>{% endif %}
+</p>
+{% if req_subjects %}
+  <p class="card" style="margin-top:0;">
+    <strong>志望校の必要科目（目安）：</strong>{{ req_subjects }}
+    <br><span class="muted">※入試方式・年度で変わります。出願前に募集要項で確認してください。</span>
+  </p>
+{% endif %}
 
-<h2>5教科の点数</h2>
+<h2>3科目の点数（河合塾 全統模試 想定）</h2>
 <table>
-  <tr><th>試験</th>{% for key,label in subjects %}<th>{{ label }}</th>{% endfor %}<th>平均</th></tr>
+  <tr><th>模試</th>{% for key,label in subjects %}<th>{{ label }}</th>{% endfor %}<th>平均</th></tr>
   {% for ex in exams %}
   <tr>
     <th>{{ ex }}</th>
@@ -29,4 +37,8 @@
     {% endfor %}
   </svg>
 </div>
+
+{% if can_judge %}
+  <p><a class="btn" href="{{ url_for('hantei', student_id=student.id) }}">合否判定を見る（先生・運営）</a></p>
+{% endif %}
 {% endblock %}

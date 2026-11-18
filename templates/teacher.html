@@ -2,12 +2,14 @@
 {% block content %}
 <h1>全生徒の成績（先生）</h1>
 <table>
-  <tr><th>氏名</th><th>志望校</th>{% for ex in exams %}<th>{{ ex }}<br>平均</th>{% endfor %}<th></th></tr>
+  <tr><th>氏名</th><th>第一志望（大学・学部）</th>{% for ex in exams %}<th>{{ ex }}<br>平均</th>{% endfor %}<th></th><th></th><th></th></tr>
   {% for r in rows %}
   <tr>
     <td>{{ r.name }}</td><td>{{ r.school }}</td>
     {% for ex in exams %}<td>{{ r.averages[ex] if r.averages[ex] is not none else '—' }}</td>{% endfor %}
     <td><a href="{{ url_for('student_page', student_id=r.id) }}">詳細</a></td>
+    <td><a href="{{ url_for('score_input', student_id=r.id) }}">点数入力</a></td>
+    <td><a href="{{ url_for('hantei', student_id=r.id) }}">合否判定</a></td>
   </tr>
   {% endfor %}
 </table>
