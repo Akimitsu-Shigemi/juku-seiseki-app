@@ -1,6 +1,7 @@
 name: guardrail-watch
-# ガードレール/フック/ルールのファイルが変わったら Slack に通知する（サーバー側で動く＝AIが止められない）。
-# 送り先は Secrets の SLACK_WEBHOOK_URL（Slack Incoming Webhook のURL）。未設定なら通知はスキップ。
+# ガードレール/フック/ルールのファイルが変わったら GitHub Issue を自動作成して通知する。
+# サーバー側(GitHub)で動くのでAIが止められない。Slack等の外部サービス・secretは不要。
+# 作成されたIssueはオーナーに割り当てられ、GitHubからメール通知が届く。
 
 on:
   push:
@@ -24,6 +25,10 @@ on:
       - '.github/workflows/guardrail-watch.yml'
       - '.github/CODEOWNERS'
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   notify:
     runs-on: ubuntu-latest
@@ -46,17 +51,31 @@ jobs:
             echo "$changed"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
-      - name: Slackへ通知
+      - name: GitHub Issue で通知
         if: steps.diff.outputs.changed != ''
+        uses: actions/github-script@v7
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: |
-          if [ -z "$SLACK_WEBHOOK_URL" ]; then
-            echo "SLACK_WEBHOOK_URL が未設定のため通知をスキップしました。"
-            exit 0
-          fi
-          commit_url="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
-          text=$(printf '⚠ ガードレール/フックが変更されました\nリポジトリ: %s\nブランチ: %s\n変更者: %s\nコミット: %s\n変更ファイル:\n%s' \
-            "${{ github.repository }}" "${{ github.ref_name }}" "${{ github.actor }}" "$commit_url" "${{ steps.diff.outputs.changed }}")
-          payload=$(jq -nc --arg t "$text" '{text:$t}')
-          curl -sS -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
+          CHANGED: ${{ steps.diff.outputs.changed }}
+        with:
+          script: |
+            const changed = process.env.CHANGED || '(不明)';
+            const sha = context.sha.substring(0, 7);
+            const url = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/commit/${context.sha}`;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `⚠ ガードレール/フックが変更されました (${sha})`,
+              body: [
+                `ブランチ: ${context.ref}`,
+                `変更者: ${context.actor}`,
+                `コミット: ${url}`,
+                '',
+                '変更ファイル:',
+                '```',
+                changed,
+                '```',
+                '',
+                '意図した変更なら、このIssueを閉じてください。心当たりがなければ内容を確認してください。'
+              ].join('\n'),
+              assignees: ['Akimitsu-Shigemi']
+            });

@@ -9,7 +9,7 @@
    未実装のP0は xfail/赤で「未達」を見える化（`tests/p0/`）。
 3. **ガードレール（仕組みで強制）**：言葉は破られるので、プログラムで守る。
    - ローカル：`hooks/`（ブランチ強制・変更検知・push前テスト）
-   - サーバー：GitHub Actions→Slack通知、CODEOWNERS、ブランチ保護
+   - サーバー：GitHub Actions→GitHub Issue通知（メールで届く）、CODEOWNERS、ブランチ保護
    - 実行環境：Claude Code の deny/サンドボックス/マネージド設定
    → 詳細は [GUARDRAILS.md](../GUARDRAILS.md)。
 
@@ -29,8 +29,8 @@ bash "/Users/akimitsu/Documents/SUNABACO/SUNABACO Cyber security testing/juku-se
 1. `.github/CODEOWNERS` のオーナー名を自分のGitHubアカウントに直す。
 2. GitHub → Settings → Branches → `main` に **ブランチ保護**
    （PR必須・CODEOWNERSレビュー必須・直接push禁止・ステータスチェック必須）。
-3. Slack **Incoming Webhook** を作り、GitHub の **Secrets** に `SLACK_WEBHOOK_URL` を登録
-   （個人DMに送るなら bot トークン方式に差し替え）。
+3. 通知は既定で **GitHub Issue**（オーナーに割り当て＝メールで届く。追加設定不要）。
+   チームでSlackに流す場合のみ、通知ステップを Webhook＋Secrets `SLACK_WEBHOOK_URL` に差し替える。
 4. `hooks/pre-push` のテストコマンドをプロジェクトに合わせる（既定 `pytest`。Next.js等なら `npm test` 等）。
 5. `SPEC.md`/`SECURITY.md` にそのプロジェクトの中身を書く。
 

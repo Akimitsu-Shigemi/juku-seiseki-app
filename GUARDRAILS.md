@@ -18,12 +18,11 @@ AIは便利だが、**ルールやフックを自分で書き換える**こと�
   正規の変更をしたら `tools/guardrail-approve.sh` を実行して台帳を更新する（**人が意図して**行う）。
 - ※ローカルフックは `--no-verify` や設定変更で外せる。だから下の②③と併用する。
 
-### ② GitHub Actions → Slack 通知（`.github/workflows/guardrail-watch.yml`）
-- push/PR でガードレール/フック/ルールのファイルが変わると、**Slackに通知**する（サーバー側で動く＝AIが止められない）。
-- **人が設定すること**：
-  1. Slack で **Incoming Webhook**（または通知用App）を作り、送り先チャンネル（例：`#test`）に紐づける。
-  2. GitHub リポの **Settings → Secrets and variables → Actions** に `SLACK_WEBHOOK_URL` を登録する（URLはリポに書かない）。
-  - **個人DMに送りたい**場合は、Webhookではなく**botトークン方式**（`chat.postMessage`, channel＝自分のmember ID）に差し替える。
+### ② GitHub Actions → GitHub Issue で通知（`.github/workflows/guardrail-watch.yml`）
+- push/PR でガードレール/フック/ルールのファイルが変わると、**GitHub Issue を自動作成**して通知する（サーバー側で動く＝AIが止められない）。
+- Issue はオーナーに割り当てられ、**GitHubからメールで届く**。**Slack不要・外部サービス不要・追加設定不要**（`GITHUB_TOKEN` だけで動く）。
+- 意図した変更なら、その Issue を閉じればよい。心当たりが無ければ内容を確認する。
+- （チームで Slack に流したい場合のみ）通知ステップを Slack Incoming Webhook（Secrets の `SLACK_WEBHOOK_URL`）に差し替える。
 
 ### ③ CODEOWNERS（`.github/CODEOWNERS`）
 - ガードレール/ルール/フックの変更に、オーナー（@Akimitsu-Shigemi）のレビューを必須にする土台。
@@ -52,6 +51,6 @@ GitHub → リポジトリ → **Settings → Branches → Branch protection rul
 | 層 | 仕組み | AIが外せるか |
 |---|---|---|
 | ローカル | gitフック（コミット阻止・変更検知） | 外せる（見張り） |
-| サーバー | GitHub Actions → Slack 通知 | **外しにくい**（workflow改変もCODEOWNERS/保護で守る） |
+| サーバー | GitHub Actions → GitHub Issue 通知（メールで届く） | **外しにくい**（workflow改変もCODEOWNERS/保護で守る） |
 | サーバー | ブランチ保護＋CODEOWNERS | **外せない**（人の設定） |
 | 実行環境 | Claude Code の deny/サンドボックス/マネージド設定 | 管理者設定なら外せない |
