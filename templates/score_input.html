@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}｜点数入力{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('teacher_page') }}">← 全生徒一覧へ戻る</a></p>
+<h1>点数入力：{{ student.name }}</h1>
+<p class="muted">志望校：{{ student.school }}｜0〜100の整数で入力。空欄のままなら、その教科は変更しません。</p>
+
+{% if saved_exam %}
+  <p class="card" style="border-color:#bfe3c8;background:#f0fbf3;color:#276749;">
+    {{ saved_exam }} の点数を保存しました。
+  </p>
+{% endif %}
+{% if error %}
+  <p class="err">{{ error }}</p>
+{% endif %}
+
+{% for ex in exams %}
+<form class="card" method="post" action="{{ url_for('score_input', student_id=student.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="exam" value="{{ ex }}">
+  <h2 style="margin-top:0;">{{ ex }} の回</h2>
+  <table>
+    <tr>{% for key, label in subjects %}<th>{{ label }}</th>{% endfor %}</tr>
+    <tr>
+      {% for key, label in subjects %}
+      <td>
+        <input type="number" name="score_{{ key }}" min="0" max="100" step="1"
+               inputmode="numeric" style="width:70px;text-align:center;"
+               value="{{ table[ex].get(key, '') }}">
+      </td>
+      {% endfor %}
+    </tr>
+  </table>
+  <button class="btn" type="submit">{{ ex }} を保存</button>
+</form>
+{% endfor %}
+{% endblock %}

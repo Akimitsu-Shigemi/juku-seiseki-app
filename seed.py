@@ -1,6 +1,7 @@
 """DBを作り直してダミーデータを投入する。
 使い方:  python seed.py
 ※学習用のダミーデータのみ。実在の個人情報は入れない（SECURITY.md）。
+※私立大学・文系特化版。出身高校は今治市の高校名（表示用のダミー）、志望は大学・学部。
 """
 import os
 import sqlite3
@@ -11,20 +12,22 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.environ.get("DB_PATH", os.path.join(BASE_DIR, "seiseki.db"))
 SCHEMA = os.path.join(BASE_DIR, "schema.sql")
 
-EXAMS = ["2026-04", "2026-07", "2026-10"]
-SUBJECTS = ["kokugo", "sugaku", "eigo", "rika", "shakai"]
-SUBJECT_OFFSET = {"kokugo": 2, "sugaku": -1, "eigo": 1, "rika": 0, "shakai": 3}
+# 河合塾 全統模試を想定した回
+EXAMS = ["2026-05", "2026-08", "2026-11"]
+# 文系3科目
+SUBJECTS = ["eigo", "kokugo", "sentaku"]
+SUBJECT_OFFSET = {"eigo": 3, "kokugo": 0, "sentaku": 1}
 
-# 生徒: (username, password, 氏名, 志望校, 基準点, 伸び)
+# 生徒: (username, password, 氏名, 出身高校(今治), 第一志望(大学・学部), 基準点, 伸び)
 STUDENTS = [
-    ("tanaka",   "sakura123", "田中さくら", "今治西高校",  78,  4),
-    ("nakamura", "hana0202",  "中村はな",   "今治西高校",  72,  3),
-    ("suzuki",   "ren2026",   "鈴木れん",   "今治北高校",  64,  5),
-    ("takahashi","yuto0510",  "高橋ゆうと", "今治北高校",  60,  2),
-    ("ito",      "mei1111",   "伊藤めい",   "今治南高校",  52,  4),
-    ("yamamoto", "sora7788",  "山本そら",   "今治南高校",  48,  6),
-    ("kobayashi","aoi3344",   "小林あおい", "今治工業高校",44,  3),
-    ("kato",     "riku9900",  "加藤りく",   "今治明徳高校",40,  5),
+    ("tanaka",   "sakura123", "田中さくら", "今治西高校",   "早稲田大学 商学部",   72, 3),
+    ("nakamura", "hana0202",  "中村はな",   "今治西高校",   "慶應義塾大学 経済学部", 70, 3),
+    ("suzuki",   "ren2026",   "鈴木れん",   "今治北高校",   "明治大学 商学部",     63, 4),
+    ("takahashi","yuto0510",  "高橋ゆうと", "今治東高校",   "立教大学 経営学部",   60, 3),
+    ("ito",      "mei1111",   "伊藤めい",   "今治南高校",   "中央大学 商学部",     55, 4),
+    ("yamamoto", "sora7788",  "山本そら",   "今治北高校",   "同志社大学 商学部",   58, 3),
+    ("kobayashi","aoi3344",   "小林あおい", "今治明徳高校", "日本大学 経済学部",   48, 3),
+    ("kato",     "riku9900",  "加藤りく",   "今治南高校",   "松山大学 経済学部",   44, 5),
 ]
 
 # 保護者: (username, password, 氏名, 子のusername)
@@ -63,10 +66,12 @@ def main():
         return cur.lastrowid
 
     ids = {}
-    for username, pw, name, school, base, growth in STUDENTS:
+    for username, pw, name, highschool, school, base, growth in STUDENTS:
         uid = add_user(username, pw, "student", name)
         ids[username] = uid
-        db.execute("INSERT INTO students (user_id, school) VALUES (?,?)", (uid, school))
+        db.execute(
+            "INSERT INTO students (user_id, highschool, school) VALUES (?,?,?)",
+            (uid, highschool, school))
         for exam, sub, score in gen_scores(base, growth):
             db.execute(
                 "INSERT INTO scores (student_id, exam, subject, score) VALUES (?,?,?,?)",

@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>全生徒の成績＋合格確率（運営）</h1>
-<p class="muted">合格確率は運営のみが閲覧できます。</p>
+<p class="muted">合格確率は運営のみが閲覧できます。偏差値は塾内の相対値（目安）、合格確率は河合塾ボーダー偏差値の目安に基づく参考値です。</p>
 <table>
-  <tr><th>氏名</th><th>志望校</th>{% for ex in exams %}<th>{{ ex }}<br>平均</th>{% endfor %}<th>偏差値</th><th>合格確率</th></tr>
+  <tr><th>氏名</th><th>第一志望（大学・学部）</th>{% for ex in exams %}<th>{{ ex }}<br>平均</th>{% endfor %}<th>偏差値<br>(目安)</th><th>合格確率<br>(目安)</th></tr>
   {% for r in rows %}
   <tr>
     <td><a href="{{ url_for('student_page', student_id=r.id) }}">{{ r.name }}</a></td>
