@@ -1,0 +1,11 @@
+# ガードレール/ルール/フックの変更は、オーナーのレビューを必須にする。
+# GitHubの「ブランチ保護（Require review from Code Owners）」と併用して初めて効く。
+/AGENTS.md                      @Akimitsu-Shigemi
+/SECURITY.md                    @Akimitsu-Shigemi
+/SPEC.md                        @Akimitsu-Shigemi
+/.claude/                       @Akimitsu-Shigemi
+/hooks/                         @Akimitsu-Shigemi
+/tools/guardrail-files.txt      @Akimitsu-Shigemi
+/tools/guardrail-check.sh       @Akimitsu-Shigemi
+/tools/guardrail-approve.sh     @Akimitsu-Shigemi
+/.github/                       @Akimitsu-Shigemi

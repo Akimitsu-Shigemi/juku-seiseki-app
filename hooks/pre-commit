@@ -1,0 +1,15 @@
+#!/bin/bash
+# 1) main/develop への直接コミットを禁止
+# 2) ガードレール/フックの無断変更を検知したらコミットを止める
+root=$(git rev-parse --show-toplevel) || exit 1
+cd "$root" || exit 1
+branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+case "$branch" in
+  main|develop)
+    echo "⛔ $branch への直接コミットは禁止です。作業ブランチを切ってください（例: git switch -c feature/xxx）。" >&2
+    exit 1;;
+esac
+if [ -f tools/guardrail-check.sh ]; then
+  bash tools/guardrail-check.sh || exit 1
+fi
+exit 0

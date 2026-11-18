@@ -1,0 +1,62 @@
+name: guardrail-watch
+# ガードレール/フック/ルールのファイルが変わったら Slack に通知する（サーバー側で動く＝AIが止められない）。
+# 送り先は Secrets の SLACK_WEBHOOK_URL（Slack Incoming Webhook のURL）。未設定なら通知はスキップ。
+
+on:
+  push:
+    paths:
+      - 'AGENTS.md'
+      - 'SECURITY.md'
+      - 'SPEC.md'
+      - '.claude/**'
+      - 'hooks/**'
+      - 'tools/guardrail-*'
+      - '.github/workflows/guardrail-watch.yml'
+      - '.github/CODEOWNERS'
+  pull_request:
+    paths:
+      - 'AGENTS.md'
+      - 'SECURITY.md'
+      - 'SPEC.md'
+      - '.claude/**'
+      - 'hooks/**'
+      - 'tools/guardrail-*'
+      - '.github/workflows/guardrail-watch.yml'
+      - '.github/CODEOWNERS'
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: 変更ファイルを検出
+        id: diff
+        run: |
+          base="${{ github.event.before }}"
+          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
+            base="HEAD~1"
+          fi
+          changed=$(git diff --name-only "$base" "${{ github.sha }}" -- \
+            AGENTS.md SECURITY.md SPEC.md .claude hooks 'tools/guardrail-*' \
+            .github/workflows/guardrail-watch.yml .github/CODEOWNERS 2>/dev/null || true)
+          {
+            echo "changed<<EOF"
+            echo "$changed"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+      - name: Slackへ通知
+        if: steps.diff.outputs.changed != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL が未設定のため通知をスキップしました。"
+            exit 0
+          fi
+          commit_url="${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}"
+          text=$(printf '⚠ ガードレール/フックが変更されました\nリポジトリ: %s\nブランチ: %s\n変更者: %s\nコミット: %s\n変更ファイル:\n%s' \
+            "${{ github.repository }}" "${{ github.ref_name }}" "${{ github.actor }}" "$commit_url" "${{ steps.diff.outputs.changed }}")
+          payload=$(jq -nc --arg t "$text" '{text:$t}')
+          curl -sS -X POST -H 'Content-type: application/json' --data "$payload" "$SLACK_WEBHOOK_URL"
