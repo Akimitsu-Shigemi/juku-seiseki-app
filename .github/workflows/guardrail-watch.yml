@@ -3,18 +3,12 @@ name: guardrail-watch
 # サーバー側(GitHub)で動くのでAIが止められない。Slack等の外部サービス・secretは不要。
 # 作成されたIssueはオーナーに割り当てられ、GitHubからメール通知が届く。
 
+# main に変更が入ったときだけ通知する（＝1変更=1件）。
+# ブランチ上の作業やPRの段階では鳴らさず、マージで main に入った瞬間に1件だけIssueを作る。
 on:
   push:
-    paths:
-      - 'AGENTS.md'
-      - 'SECURITY.md'
-      - 'SPEC.md'
-      - '.claude/**'
-      - 'hooks/**'
-      - 'tools/guardrail-*'
-      - '.github/workflows/guardrail-watch.yml'
-      - '.github/CODEOWNERS'
-  pull_request:
+    branches:
+      - main
     paths:
       - 'AGENTS.md'
       - 'SECURITY.md'
