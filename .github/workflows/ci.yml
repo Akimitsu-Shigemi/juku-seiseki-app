@@ -1,0 +1,37 @@
+name: ci
+# PR と main への変更ごとに、自動でテスト(pytest)を回す。
+# 「テストで証明する」を仕組みで強制するための見張り番。
+# これを main の必須チェックに設定すると、緑でないとマージできなくなる。
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: pytest
+    runs-on: ubuntu-latest
+    steps:
+      - name: ソースを取得
+        uses: actions/checkout@v4
+
+      - name: Python を用意
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: 依存ライブラリをインストール
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: テストを実行（全部緑＝対策が効いている証拠）
+        run: pytest -q
