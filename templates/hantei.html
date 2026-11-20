@@ -21,9 +21,10 @@
   {% else %}<span class="muted">要確認</span>{% endif %}
   {% if note %}<br><span class="muted" style="font-size:0.85em">{{ note }}</span>{% endif %}
 {% endmacro %}
+{% macro target_table(grouped, dim) %}
 {% for group, items in grouped %}
-<h2>{{ group }}</h2>
-<table>
+<h3 style="{% if dim %}color:#6b7280{% endif %}">{{ group }}</h3>
+<table{% if dim %} style="opacity:0.75"{% endif %}>
   <tr><th>大学・学部</th><th>政経<br>受験</th><th>判定<br>(目安)</th><th>合格まで<br>(偏差値差)</th><th>ボーダー偏差値<br>(目安)</th><th>合格確率<br>(目安)</th><th>必要科目（目安）</th></tr>
   {% for it in items %}
   <tr>
@@ -55,6 +56,18 @@
   {% endfor %}
 </table>
 {% endfor %}
+{% endmacro %}
+
+<h2>🎯 政経で狙える大学（○・△）</h2>
+<p class="muted">この塾は政治経済に特化しているため、政経で受験できる大学を目標にします。△は方式・日程が限定されます。</p>
+{{ target_table(grouped_ok, false) }}
+
+{% if grouped_ng %}
+<h2 style="color:#6b7280;margin-top:28px">参考：政経では受けられない大学（×）</h2>
+<p class="muted">政治・経済では受験できない大学です（別科目なら受験可の場合あり）。政経特化の方針では対象外ですが、参考として残しています。</p>
+{{ target_table(grouped_ng, true) }}
+{% endif %}
+
 <p class="muted">判定ランクは本人の偏差値とボーダー偏差値の差による目安（A=合格圏〜E=努力圏）。実際の合否は入試方式・当日の得点で決まります。</p>
 <p class="muted">「政経受験」＝一般選抜（大学独自の個別入試）で政治・経済を選んで受験できるか。○=可／△=方式・日程が限定（△にカーソルで条件）／×=不可または共テ利用のみ。2027年度入試の目安（準公式情報中心）で、出願前に各大学の公式募集要項で要確認です。</p>
 {% endblock %}
