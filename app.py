@@ -27,7 +27,7 @@ DB_PATH = os.environ.get("DB_PATH", os.path.join(BASE_DIR, "seiseki.db"))
 
 # 塾のブランド（全ページで一貫して使う）
 JUKU_NAME = "今治一点突破ゼミナール"
-JUKU_TAGLINE = "英語・国語・政治経済の3科目で、難関私大へ"
+JUKU_TAGLINE = "英語・国語・政治経済の3科目で、私立文系の難関大へ"
 
 # 文系3科目（少科目特化）
 SUBJECTS = [("eigo", "英語"), ("kokugo", "国語"), ("sentaku", "選択(地歴公民)")]
