@@ -27,7 +27,7 @@
 </head>
 <body>
 <header>
-  <strong>学習塾 成績管理</strong>
+  <span><strong>{{ juku_name }}</strong> <span class="muted" style="font-size:12px">{{ juku_tagline }}</span></span>
   {% if user %}<span class="who">{{ user.name }}（{{ user.role }}）｜<a href="{{ url_for('logout') }}">ログアウト</a></span>{% endif %}
 </header>
 <main>

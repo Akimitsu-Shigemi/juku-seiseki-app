@@ -1,5 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
+
+<section class="card" style="max-width:620px;background:#fbfdff;border-color:#cfe0f0">
+  <p class="muted" style="margin:0 0 6px">{{ juku_name }}｜{{ juku_tagline }}</p>
+  <h1 style="font-size:24px;line-height:1.35;margin:0 0 12px">
+    文系156人中149位。<br>そこから、明治へ。
+  </h1>
+  <p style="margin:0 0 10px;line-height:1.7">
+    高1最後の試験は、学年ビリ争い。正直、ヤンキーより下だった。<br>
+    でも、全部はやらなかった。<br>
+    <strong>やったのは、英語・国語・政治経済の3科目だけ。</strong><br>
+    科目を絞り、戦略で勝負した。
+  </p>
+  <p style="margin:0 0 10px;line-height:1.7">
+    結果は――<strong>明治大学 商学部・経営学部、学習院大学、合格。</strong><br>
+    今治の、ふつう以下だった私が証明しました。
+  </p>
+  <p style="margin:0;font-weight:bold;font-size:17px">次は、きみの番だ。</p>
+</section>
+
 <h1>ログイン</h1>
 {% if error %}<p class="err">{{ error }}</p>{% endif %}
 <form method="post" class="card" style="max-width:360px">
