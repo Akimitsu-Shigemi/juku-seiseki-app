@@ -288,6 +288,31 @@ def pass_probability(student_hensachi, school):
     return max(1, min(99, round(p)))
 
 
+# 判定ランク（河合塾式の目安）。本人の偏差値 − ボーダー偏差値 の差(gap)で決める。
+#   gap が大きい（本人がボーダーを上回る）ほど合格に近い。
+JUDGE_BANDS = [
+    (6.0, "A", "合格圏"),
+    (3.0, "B", "合格有望"),
+    (0.0, "C", "ボーダー"),
+    (-3.0, "D", "要努力"),
+]  # これ未満は E（努力圏）
+
+
+def judgement(student_hensachi, school):
+    """先生・運営のみ。本人の偏差値とボーダー偏差値から判定ランクと差を返す。
+    gap>0=ボーダーを上回る（届いている）、gap<0=あと何偏差値で届くか。"""
+    target = TARGET_BY_NAME.get(school)
+    if student_hensachi is None or target is None:
+        return None
+    gap = round(student_hensachi - target["hensachi"], 1)
+    rank, label = "E", "努力圏"
+    for threshold, r, l in JUDGE_BANDS:
+        if gap >= threshold:
+            rank, label = r, l
+            break
+    return {"rank": rank, "label": label, "gap": gap}
+
+
 # ---------- ルート ----------
 def register_routes(app):
     app.teardown_appcontext(close_db)
@@ -456,6 +481,7 @@ def register_routes(app):
                 "name": t["name"], "hensachi": t["hensachi"],
                 "subjects": t["subjects"],
                 "prob": pass_probability(hensachi, t["name"]),
+                "judge": judgement(hensachi, t["name"]),
             })
         grouped = [(g, groups[g]) for g in order if groups[g]]
         return render_template(

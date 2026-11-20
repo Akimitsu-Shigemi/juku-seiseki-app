@@ -13,13 +13,28 @@
   この画面は先生・運営のみが閲覧できます。
 </p>
 
+{% macro rank_color(rank) %}{% if rank in ['A','B'] %}#276749{% elif rank == 'C' %}#92610a{% else %}#9b2c2c{% endif %}{% endmacro %}
 {% for group, items in grouped %}
 <h2>{{ group }}</h2>
 <table>
-  <tr><th>大学・学部</th><th>ボーダー偏差値<br>(目安)</th><th>合格確率<br>(目安)</th><th>必要科目（目安）</th></tr>
+  <tr><th>大学・学部</th><th>判定<br>(目安)</th><th>合格まで<br>(偏差値差)</th><th>ボーダー偏差値<br>(目安)</th><th>合格確率<br>(目安)</th><th>必要科目（目安）</th></tr>
   {% for it in items %}
   <tr>
     <td style="text-align:left">{{ it.name }}{% if it.name == student.school %} <span class="muted">（第一志望）</span>{% endif %}</td>
+    <td>
+      {% if it.judge is none %}—
+      {% else %}
+      <span style="display:inline-block;min-width:1.6em;padding:2px 6px;border-radius:4px;
+                   color:#fff;font-weight:bold;background:{{ rank_color(it.judge.rank) }}">{{ it.judge.rank }}</span>
+      <br><span class="muted">{{ it.judge.label }}</span>
+      {% endif %}
+    </td>
+    <td>
+      {% if it.judge is none %}—
+      {% elif it.judge.gap >= 0 %}<span style="color:#276749">届いている（+{{ it.judge.gap }}）</span>
+      {% else %}<strong style="color:#9b2c2c">あと {{ (-it.judge.gap) | round(1) }}</strong>
+      {% endif %}
+    </td>
     <td>{{ it.hensachi }}</td>
     <td>
       {% if it.prob is none %}—
@@ -32,4 +47,5 @@
   {% endfor %}
 </table>
 {% endfor %}
+<p class="muted">判定ランクは本人の偏差値とボーダー偏差値の差による目安（A=合格圏〜E=努力圏）。実際の合否は入試方式・当日の得点で決まります。</p>
 {% endblock %}
