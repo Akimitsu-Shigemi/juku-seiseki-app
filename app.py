@@ -117,9 +117,13 @@ def create_app():
         raise RuntimeError(
             "SECRET_KEY が設定されていません。.env.example を .env にコピーして設定してください。")
     app.config["SECRET_KEY"] = secret
+    # 本番(HTTPS)では SECURE_COOKIES=1 を設定して Secure 属性を付ける。
+    # ローカル開発(HTTP)では付けない（付けるとCookieが送られずログインできない）。
+    secure_cookies = os.environ.get("SECURE_COOKIES", "") == "1"
     app.config.update(
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
+        SESSION_COOKIE_SECURE=secure_cookies,
     )
     register_routes(app)
     return app
