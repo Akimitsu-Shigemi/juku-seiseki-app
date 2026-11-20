@@ -67,3 +67,23 @@ def test_student_page_shows_seikei(client):
     login(client, "tanaka", "sakura123")
     body = client.get("/student/1").data.decode()
     assert "政治・経済で受験" in body
+
+
+def test_all_dummy_students_aim_seikei_ok():
+    # 政経特化塾なので、ダミー生徒の第一志望は政経で受けられる(○/△)校であること
+    m = _app()
+    import seed
+    for row in seed.STUDENTS:
+        school = row[4]
+        mark = m.TARGET_BY_NAME[school]["seikei"]
+        assert mark in ("○", "△"), f"{row[2]} の第一志望 {school} が政経× ({mark})"
+
+
+def test_hantei_splits_ok_and_ng(client):
+    # 合否判定が「政経で狙える」と「政経では受けられない(参考)」に分かれている
+    login(client, "sensei", "teacher2026")
+    body = client.get("/hantei/1").data.decode()
+    assert "政経で狙える大学" in body
+    assert "政経では受けられない大学" in body
+    # ×校(慶應)は参考側に出る
+    assert "慶應" in body

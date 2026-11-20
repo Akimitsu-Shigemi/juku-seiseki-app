@@ -507,20 +507,28 @@ def register_routes(app):
 
         # グループ順にまとめる
         order = ["早慶上智ICU", "MARCH", "関関同立", "その他"]
-        groups = {g: [] for g in order}
+        # 政経で狙える校(○・△)と、政経では受けられない校(×・参考)に分ける。
+        # この塾は政治経済に特化しているため、×校は「参考」として下にまとめる。
+        groups_ok = {g: [] for g in order}
+        groups_ng = {g: [] for g in order}
         for t in TARGETS:
-            groups[t["group"]].append({
+            item = {
                 "name": t["name"], "hensachi": t["hensachi"],
                 "subjects": t["subjects"],
                 "prob": pass_probability(hensachi, t["name"]),
                 "judge": judgement(hensachi, t["name"]),
                 "seikei": t.get("seikei", "要確認"),
                 "seikei_note": t.get("seikei_note", ""),
-            })
-        grouped = [(g, groups[g]) for g in order if groups[g]]
+            }
+            if item["seikei"] == "×":
+                groups_ng[t["group"]].append(item)
+            else:
+                groups_ok[t["group"]].append(item)
+        grouped_ok = [(g, groups_ok[g]) for g in order if groups_ok[g]]
+        grouped_ng = [(g, groups_ng[g]) for g in order if groups_ng[g]]
         return render_template(
             "hantei.html", user=current_user(), student=student,
-            hensachi=hensachi, grouped=grouped)
+            hensachi=hensachi, grouped_ok=grouped_ok, grouped_ng=grouped_ng)
 
     @app.route("/admin")
     @role_required("admin")
