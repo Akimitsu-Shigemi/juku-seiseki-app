@@ -1,29 +1,113 @@
 {% extends "base.html" %}
-{% block content %}
+{% block title %}｜地方から、難関私大へ{% endblock %}
 
-<section class="card" style="max-width:620px;background:#fbfdff;border-color:#cfe0f0">
-  <p class="muted" style="margin:0 0 6px">{{ juku_name }}｜{{ juku_tagline }}</p>
-  <h1 style="font-size:24px;line-height:1.35;margin:0 0 12px">
-    文系156人中149位。<br>そこから、明治へ。
-  </h1>
-  <p style="margin:0 0 10px;line-height:1.7">
-    高1最後の試験は、学年ビリ争い。正直、ヤンキーより下だった。<br>
-    でも、全部はやらなかった。<br>
-    <strong>やったのは、英語・国語・政治経済の3科目だけ。</strong><br>
-    科目を絞り、戦略で勝負した。
-  </p>
-  <p style="margin:0 0 10px;line-height:1.7">
-    結果は――<strong>明治大学 商学部・経営学部、学習院大学、合格。</strong><br>
-    今治の、ふつう以下だった私が証明しました。
-  </p>
-  <p style="margin:0;font-weight:bold;font-size:17px">次は、きみの番だ。</p>
-</section>
+{% block head_extra %}
+  .lp{min-height:100vh; display:flex; flex-direction:column}
+  .hero{position:relative; flex:1; overflow:hidden;
+    background:radial-gradient(1100px 620px at 78% -10%, #27304d 0%, rgba(39,48,77,0) 60%),
+               radial-gradient(900px 560px at 8% 115%, #3a1b1f 0%, rgba(58,27,31,0) 55%),
+               linear-gradient(160deg,#0f1320 0%,#141a2b 52%,#0c0f1a 100%);
+    color:#f6f2ea}
+  .hero::before{content:"合格"; position:absolute; right:-4vw; top:-6vw;
+    font-family:var(--serif); font-weight:800; font-size:46vw; line-height:.8;
+    color:#fff; opacity:.035; letter-spacing:-.04em; pointer-events:none; user-select:none}
+  .hero::after{content:""; position:absolute; inset:0; pointer-events:none;
+    background-image:radial-gradient(rgba(255,255,255,.35) .5px, transparent .5px);
+    background-size:3px 3px; opacity:.05}
+  .hero .bar{position:relative; z-index:2; display:flex; align-items:baseline; gap:12px;
+    padding:22px clamp(20px,5vw,56px)}
+  .hero .bar .nm{font-family:var(--serif); font-weight:800; font-size:clamp(15px,2.4vw,19px); color:#fff}
+  .hero .bar .tg{font-size:12px; color:#b9c0d6}
+  .wrap{position:relative; z-index:2; max-width:1120px; margin:0 auto; width:100%;
+    padding:clamp(18px,4vw,40px) clamp(20px,5vw,56px) clamp(40px,7vw,80px);
+    display:grid; grid-template-columns:1.15fr .85fr; gap:clamp(28px,5vw,64px); align-items:center}
+  .eyebrow{display:inline-block; font-size:12.5px; letter-spacing:.22em; color:var(--gold);
+    border:1px solid rgba(184,151,90,.4); border-radius:999px; padding:6px 14px; margin-bottom:22px}
+  .lede{font-family:var(--serif); font-weight:800; font-size:clamp(30px,4.6vw,50px);
+    line-height:1.18; letter-spacing:-.01em; margin:0 0 10px; color:#fff; text-wrap:balance}
+  .lede .nb{white-space:nowrap}
+  .lede .hl{color:#ff6b57; text-shadow:0 2px 30px rgba(255,107,87,.25)}
+  .story{color:#cfd4e2; font-size:clamp(15px,1.7vw,17px); line-height:1.95; margin:18px 0 0; max-width:30em}
+  .story b{color:#fff; font-weight:700}
+  .stats{display:flex; gap:clamp(18px,3vw,34px); margin:30px 0 0; flex-wrap:wrap}
+  .stat .n{font-family:"Oswald",var(--serif); font-weight:700; font-size:clamp(30px,4.4vw,46px);
+    color:#fff; line-height:1}
+  .stat .n .u{font-size:.5em; color:var(--gold); margin-left:3px}
+  .stat .l{font-size:12.5px; color:#aab2c8; margin-top:6px; letter-spacing:.03em}
+  .stat .sep{width:1px; align-self:stretch; background:linear-gradient(#ffffff22,#ffffff05)}
 
-<h1>ログイン</h1>
-{% if error %}<p class="err">{{ error }}</p>{% endif %}
-<form method="post" class="card" style="max-width:360px">
-  <p><label>ID<br><input name="username" autocomplete="username" required></label></p>
-  <p><label>パスワード<br><input name="password" type="password" autocomplete="current-password" required></label></p>
-  <button class="btn" type="submit">ログイン</button>
-</form>
+  .panel{background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.16);
+    border-radius:20px; padding:clamp(22px,3vw,30px); backdrop-filter:blur(8px);
+    box-shadow:0 30px 70px rgba(0,0,0,.4)}
+  .panel h2{font-family:var(--serif); color:#fff; border:0; margin:0 0 4px; font-size:21px; padding:0}
+  .panel p.sub{color:#b9c0d6; font-size:13px; margin:0 0 18px}
+  .panel label{color:#e9ecf5; font-weight:500; font-size:14px}
+  .panel input{background:rgba(255,255,255,.95); border-color:transparent; margin-top:6px}
+  .panel .btn{width:100%; margin-top:6px; padding:13px}
+  .panel .err{margin-bottom:14px}
+  .hint{color:#9aa2ba; font-size:12px; margin-top:14px; line-height:1.7}
+
+  .proof{background:var(--paper); border-top:1px solid var(--line);
+    padding:clamp(22px,4vw,40px) clamp(20px,5vw,56px)}
+  .proof .in{max-width:1120px; margin:0 auto; display:flex; flex-wrap:wrap; gap:14px 30px;
+    align-items:center; justify-content:center; color:var(--ink-soft); font-size:14px}
+  .proof .in b{color:var(--ink); font-family:var(--serif)}
+
+  @media(max-width:860px){
+    .wrap{grid-template-columns:1fr; gap:30px}
+    .hero::before{font-size:72vw; top:auto; bottom:-10vw}
+  }
+{% endblock %}
+
+{% block body %}
+<div class="lp">
+  <section class="hero">
+    <div class="bar">
+      <span class="nm">{{ juku_name }}</span>
+      <span class="tg">{{ juku_tagline }}</span>
+    </div>
+    <div class="wrap">
+      <div class="col-left rise">
+        <span class="eyebrow">地方公立 × 少科目特化 × 逆転合格</span>
+        <h1 class="lede"><span class="nb">文系156人中149位。</span><br><span class="hl nb">そこから、明治へ。</span></h1>
+        <p class="story">
+          高1最後の試験は、学年ビリ争い。正直、ヤンキーより下だった。<br>
+          でも、全部はやらなかった。やったのは、<b>英語・国語・政治経済の3科目だけ</b>。<br>
+          科目を絞り、戦略で勝負した。結果は――<b>明治大学 商学部・経営学部、学習院大学、合格。</b>
+        </p>
+        <div class="stats">
+          <div class="stat"><div class="n">149<span class="u">位</span></div><div class="l">156人中・学年ビリ争い</div></div>
+          <div class="sep"></div>
+          <div class="stat"><div class="n">3<span class="u">科目</span></div><div class="l">英語・国語・政治経済に特化</div></div>
+          <div class="sep"></div>
+          <div class="stat"><div class="n">MARCH<span class="u">合格</span></div><div class="l">明治・学習院へ逆転</div></div>
+        </div>
+      </div>
+
+      <div class="col-right rise" style="animation-delay:.12s">
+        <div class="panel">
+          <h2>生徒・保護者・先生ログイン</h2>
+          <p class="sub">成績・模試・合否判定を見る</p>
+          {% if error %}<p class="err">{{ error }}</p>{% endif %}
+          <form method="post">
+            <p><label>ID<br><input name="username" autocomplete="username" required></label></p>
+            <p><label>パスワード<br><input name="password" type="password" autocomplete="current-password" required></label></p>
+            <button class="btn" type="submit">ログインする →</button>
+          </form>
+          <p class="hint">次は、きみの番だ。<br>— {{ juku_name }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="proof">
+    <div class="in">
+      <span><b>英語・国語・政治経済</b>の3科目に集中</span>
+      <span>｜</span>
+      <span>狙うのは<b>MARCH・関関同立</b>（政経で受験できる大学）</span>
+      <span>｜</span>
+      <span>愛媛・今治発、<b>難関私大</b>へ</span>
+    </div>
+  </section>
+</div>
 {% endblock %}
