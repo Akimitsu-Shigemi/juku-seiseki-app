@@ -14,13 +14,21 @@
 </p>
 
 {% macro rank_color(rank) %}{% if rank in ['A','B'] %}#276749{% elif rank == 'C' %}#92610a{% else %}#9b2c2c{% endif %}{% endmacro %}
+{% macro seikei_badge(mark, note) %}
+  {% if mark == '○' %}<span style="color:#276749;font-weight:bold">○</span>
+  {% elif mark == '△' %}<span style="color:#92610a;font-weight:bold" title="{{ note }}">△</span>
+  {% elif mark == '×' %}<span style="color:#9b2c2c;font-weight:bold" title="{{ note }}">×</span>
+  {% else %}<span class="muted">要確認</span>{% endif %}
+  {% if note %}<br><span class="muted" style="font-size:0.85em">{{ note }}</span>{% endif %}
+{% endmacro %}
 {% for group, items in grouped %}
 <h2>{{ group }}</h2>
 <table>
-  <tr><th>大学・学部</th><th>判定<br>(目安)</th><th>合格まで<br>(偏差値差)</th><th>ボーダー偏差値<br>(目安)</th><th>合格確率<br>(目安)</th><th>必要科目（目安）</th></tr>
+  <tr><th>大学・学部</th><th>政経<br>受験</th><th>判定<br>(目安)</th><th>合格まで<br>(偏差値差)</th><th>ボーダー偏差値<br>(目安)</th><th>合格確率<br>(目安)</th><th>必要科目（目安）</th></tr>
   {% for it in items %}
   <tr>
     <td style="text-align:left">{{ it.name }}{% if it.name == student.school %} <span class="muted">（第一志望）</span>{% endif %}</td>
+    <td>{{ seikei_badge(it.seikei, it.seikei_note) }}</td>
     <td>
       {% if it.judge is none %}—
       {% else %}
@@ -48,4 +56,5 @@
 </table>
 {% endfor %}
 <p class="muted">判定ランクは本人の偏差値とボーダー偏差値の差による目安（A=合格圏〜E=努力圏）。実際の合否は入試方式・当日の得点で決まります。</p>
+<p class="muted">「政経受験」＝一般選抜（大学独自の個別入試）で政治・経済を選んで受験できるか。○=可／△=方式・日程が限定（△にカーソルで条件）／×=不可または共テ利用のみ。2027年度入試の目安（準公式情報中心）で、出願前に各大学の公式募集要項で要確認です。</p>
 {% endblock %}
