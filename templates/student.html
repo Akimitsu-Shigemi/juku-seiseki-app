@@ -8,6 +8,13 @@
 {% if req_subjects %}
   <p class="card" style="margin-top:0;">
     <strong>志望校の必要科目（目安）：</strong>{{ req_subjects }}
+    {% if seikei %}
+    <br><strong>政治・経済で受験：</strong>
+    {% if seikei.mark == '○' %}<span style="color:#276749;font-weight:bold">○ 可</span>
+    {% elif seikei.mark == '△' %}<span style="color:#92610a;font-weight:bold">△ 条件付き</span>（{{ seikei.note }}）
+    {% elif seikei.mark == '×' %}<span style="color:#9b2c2c;font-weight:bold">× 不可</span>{% if seikei.note %}（{{ seikei.note }}）{% endif %}
+    {% else %}<span class="muted">要確認</span>{% endif %}
+    {% endif %}
     <br><span class="muted">※入試方式・年度で変わります。出願前に募集要項で確認してください。</span>
   </p>
 {% endif %}

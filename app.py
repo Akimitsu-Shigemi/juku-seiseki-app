@@ -34,46 +34,69 @@ EXAMS = ["2026-05", "2026-08", "2026-11"]
 # 志望校（私立大学・学部）の目安データ。
 #   hensachi : 河合塾のボーダー偏差値を参考にした「目安」。年度・方式で変わるため要更新。
 #   subjects : その学部の必要科目の「目安」。実際は募集要項で要確認。
+#   seikei   : 一般選抜（大学独自の個別入試）で「政治・経済」を選んで受験できるか。
+#              ○=可 / △=条件付き（方式・日程が限定）/ ×=不可または共テ利用のみ。
+#              2027年度入試の目安（準公式の二次情報中心）。出願前に公式要項で要確認。
+#   seikei_note : △・×の理由や条件のメモ。
 # 合格確率・合否判定は先生・運営のみが使う（生徒には合格確率を見せない）。
 TARGETS = [
     {"name": "早稲田大学 政治経済学部", "group": "早慶上智ICU", "hensachi": 70.0,
-     "subjects": "共通テスト＋学部独自(総合問題)。数学が必須"},
+     "subjects": "共通テスト＋学部独自(総合問題)。数学が必須",
+     "seikei": "×", "seikei_note": "独自「総合問題」で社会科目なし"},
     {"name": "早稲田大学 商学部", "group": "早慶上智ICU", "hensachi": 70.0,
-     "subjects": "英語・国語・選択(地歴/数学)"},
+     "subjects": "英語・国語・選択(地歴/数学)",
+     "seikei": "○", "seikei_note": ""},
     {"name": "慶應義塾大学 経済学部", "group": "早慶上智ICU", "hensachi": 67.5,
-     "subjects": "英語・数学or地歴＋小論文（国語なし）"},
+     "subjects": "英語・数学or地歴＋小論文（国語なし）",
+     "seikei": "×", "seikei_note": "社会は世界史/日本史のみ"},
     {"name": "慶應義塾大学 商学部", "group": "早慶上智ICU", "hensachi": 67.5,
-     "subjects": "英語・地歴＋数学or小論文（国語なし）"},
+     "subjects": "英語・地歴＋数学or小論文（国語なし）",
+     "seikei": "×", "seikei_note": "地歴のみ（政経なし）"},
     {"name": "上智大学 経済学部", "group": "早慶上智ICU", "hensachi": 65.0,
-     "subjects": "英語外部試験(TEAP)・共通テスト併用など"},
+     "subjects": "英語外部試験(TEAP)・共通テスト併用など",
+     "seikei": "×", "seikei_note": "政経は共テ利用のみ"},
     {"name": "国際基督教大学(ICU) 教養学部", "group": "早慶上智ICU", "hensachi": 67.5,
-     "subjects": "独自試験(総合教養＋人文/社会科学)"},
+     "subjects": "独自試験(総合教養＋人文/社会科学)",
+     "seikei": "×", "seikei_note": "独自の総合問題のみ（社会なし）"},
     {"name": "明治大学 商学部", "group": "MARCH", "hensachi": 62.5,
-     "subjects": "英語・国語・選択(地歴公民)"},
+     "subjects": "英語・国語・選択(地歴公民)",
+     "seikei": "○", "seikei_note": ""},
     {"name": "明治大学 政治経済学部", "group": "MARCH", "hensachi": 62.5,
-     "subjects": "英語・国語・選択(地歴公民/数学)"},
+     "subjects": "英語・国語・選択(地歴公民/数学)",
+     "seikei": "○", "seikei_note": ""},
     {"name": "青山学院大学 経営学部", "group": "MARCH", "hensachi": 62.5,
-     "subjects": "英語・国語・選択(共通テスト併用の方式あり)"},
+     "subjects": "英語・国語・選択(共通テスト併用の方式あり)",
+     "seikei": "△", "seikei_note": "独自で政経可は全学部日程のみ"},
     {"name": "立教大学 経営学部", "group": "MARCH", "hensachi": 65.0,
-     "subjects": "英語外部試験＋共通テスト＋独自"},
+     "subjects": "英語外部試験＋共通テスト＋独自",
+     "seikei": "△", "seikei_note": "独自で政経可は2/12日程のみ"},
     {"name": "中央大学 商学部", "group": "MARCH", "hensachi": 60.0,
-     "subjects": "英語・国語・選択(地歴公民)"},
+     "subjects": "英語・国語・選択(地歴公民)",
+     "seikei": "○", "seikei_note": ""},
     {"name": "法政大学 経営学部", "group": "MARCH", "hensachi": 60.0,
-     "subjects": "英語・国語・選択(地歴公民)"},
+     "subjects": "英語・国語・選択(地歴公民)",
+     "seikei": "△", "seikei_note": "A方式のみ（T日程は社会なし）"},
     {"name": "関西大学 経済学部", "group": "関関同立", "hensachi": 57.5,
-     "subjects": "英語・国語・選択(地歴公民)"},
+     "subjects": "英語・国語・選択(地歴公民)",
+     "seikei": "○", "seikei_note": ""},
     {"name": "関西学院大学 商学部", "group": "関関同立", "hensachi": 57.5,
-     "subjects": "英語・国語・選択(地歴公民)"},
+     "subjects": "英語・国語・選択(地歴公民)",
+     "seikei": "×", "seikei_note": "政経は共テ利用のみ"},
     {"name": "同志社大学 商学部", "group": "関関同立", "hensachi": 62.5,
-     "subjects": "英語・国語・選択(地歴公民)"},
+     "subjects": "英語・国語・選択(地歴公民)",
+     "seikei": "○", "seikei_note": ""},
     {"name": "立命館大学 経営学部", "group": "関関同立", "hensachi": 57.5,
-     "subjects": "英語・国語・選択(全学統一方式など)"},
+     "subjects": "英語・国語・選択(全学統一方式など)",
+     "seikei": "△", "seikei_note": "経営学科「情報型」は不可"},
     {"name": "学習院大学 経済学部", "group": "その他", "hensachi": 60.0,
-     "subjects": "英語・国語・選択(地歴公民)"},
+     "subjects": "英語・国語・選択(地歴公民)",
+     "seikei": "○", "seikei_note": ""},
     {"name": "日本大学 経済学部", "group": "その他", "hensachi": 55.0,
-     "subjects": "英語・国語・選択(N方式など)"},
+     "subjects": "英語・国語・選択(N方式など)",
+     "seikei": "△", "seikei_note": "N全学2期は社会なし"},
     {"name": "松山大学 経済学部", "group": "その他", "hensachi": 50.0,
-     "subjects": "英語・国語・選択(地歴公民)"},
+     "subjects": "英語・国語・選択(地歴公民)",
+     "seikei": "○", "seikei_note": ""},
 ]
 TARGET_BY_NAME = {t["name"]: t for t in TARGETS}
 
@@ -205,6 +228,14 @@ def target_subjects(school):
     """志望校（大学・学部）の必要科目（目安）。未登録ならNone。"""
     t = TARGET_BY_NAME.get(school)
     return t["subjects"] if t else None
+
+
+def target_seikei(school):
+    """志望校の政経受験可否（○/△/×と理由）。未登録ならNone。"""
+    t = TARGET_BY_NAME.get(school)
+    if not t:
+        return None
+    return {"mark": t.get("seikei", "要確認"), "note": t.get("seikei_note", "")}
 
 
 def get_scores(student_id):
@@ -396,6 +427,7 @@ def register_routes(app):
             "student.html", user=user, student=student, subjects=SUBJECTS,
             exams=EXAMS, table=table, averages=averages, hensachi=hensachi,
             req_subjects=target_subjects(student["school"]),
+            seikei=target_seikei(student["school"]),
             can_judge=user["role"] in ("teacher", "admin"),
             chart=build_chart(averages))
 
@@ -482,6 +514,8 @@ def register_routes(app):
                 "subjects": t["subjects"],
                 "prob": pass_probability(hensachi, t["name"]),
                 "judge": judgement(hensachi, t["name"]),
+                "seikei": t.get("seikei", "要確認"),
+                "seikei_note": t.get("seikei_note", ""),
             })
         grouped = [(g, groups[g]) for g in order if groups[g]]
         return render_template(
